@@ -1,2 +1,2 @@
 # wiki-voyage
-WikiVoyage a simple wiki application.
+WikiVoyage is a simple Android Wikipedia application.
