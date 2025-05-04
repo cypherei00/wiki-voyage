@@ -15,6 +15,7 @@ import androidx.room.Room
 import com.example.wikipedia_app.data.AppDatabase
 import com.example.wikipedia_app.data.BookmarkRepository
 import com.example.wikipedia_app.data.GameService
+//import com.example.wikipedia_app.data.GameService
 import com.example.wikipedia_app.data.HistoryRepository
 import com.example.wikipedia_app.data.TrendingRepository
 import com.example.wikipedia_app.navigation.Screen
