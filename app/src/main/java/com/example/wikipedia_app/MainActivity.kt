@@ -28,6 +28,7 @@ import com.example.wikipedia_app.ui.theme.WikipediaAppTheme
 import com.example.wikipedia_app.ui.viewmodels.BookmarkViewModel
 import com.example.wikipedia_app.ui.viewmodels.HistoryViewModel
 import com.example.wikipedia_app.ui.viewmodels.TrendingViewModel
+import com.example.wikipedia_app.ui.viewmodels.TTSViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,12 +60,16 @@ class MainActivity : ComponentActivity() {
                 val gameService = remember {
                     GameService()
                 }
+                val ttsViewModel = remember {
+                    TTSViewModel(this)
+                }
                 WikipediaNavGraph(
                     navController = navController,
                     bookmarkViewModel = bookmarkViewModel,
                     historyViewModel = historyViewModel,
                     trendingViewModel = trendingViewModel,
-                    gameService = gameService
+                    gameService = gameService,
+                    ttsViewModel = ttsViewModel
                 )
             }
         }
@@ -77,7 +82,8 @@ fun WikipediaNavGraph(
     bookmarkViewModel: BookmarkViewModel,
     historyViewModel: HistoryViewModel,
     trendingViewModel: TrendingViewModel,
-    gameService: GameService
+    gameService: GameService,
+    ttsViewModel: TTSViewModel
 ) {
     NavHost(
         navController = navController,
@@ -108,7 +114,8 @@ fun WikipediaNavGraph(
                 title = title,
                 navController = navController,
                 viewModel = bookmarkViewModel,
-                historyViewModel = historyViewModel
+                historyViewModel = historyViewModel,
+                ttsViewModel = ttsViewModel
             )
         }
         composable(Screen.Bookmarks.route) {

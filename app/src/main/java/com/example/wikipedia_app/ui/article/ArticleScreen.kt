@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +65,7 @@ import com.example.wikipedia_app.ui.theme.DarkBrown
 import com.example.wikipedia_app.ui.theme.TealCyan
 import com.example.wikipedia_app.ui.viewmodels.BookmarkViewModel
 import com.example.wikipedia_app.ui.viewmodels.HistoryViewModel
+import com.example.wikipedia_app.ui.viewmodels.TTSViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +73,8 @@ fun ArticleScreen(
     navController: NavController,
     title: String,
     viewModel: BookmarkViewModel,
-    historyViewModel: HistoryViewModel
+    historyViewModel: HistoryViewModel,
+    ttsViewModel: TTSViewModel
 ) {
     var articleContent by remember { mutableStateOf<ArticleContent?>(null) }
     var articleDescription by remember { mutableStateOf<String?>(null) }
@@ -80,6 +84,7 @@ fun ArticleScreen(
     var sectionsLoaded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val isBookmarked by viewModel.isBookmarked.collectAsState()
+    val isSpeaking by ttsViewModel.isSpeaking.collectAsState()
 
     LaunchedEffect(title) {
         viewModel.checkBookmarkStatus(title)
@@ -156,6 +161,30 @@ fun ArticleScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = {
+                            if (isSpeaking) {
+                                ttsViewModel.stop()
+                            } else {
+                                val textToSpeak = buildString {
+                                    articleDescription?.let { append(it + "\n\n") }
+                                    articleContent?.sections?.forEach { section ->
+                                        append(section.title + "\n")
+                                        append(section.content + "\n\n")
+                                    }
+                                }
+                                Log.d("TTS", "Text to speak length: ${textToSpeak.length}")
+                                Log.d("TTS", "First 100 chars: ${textToSpeak.take(100)}")
+                                ttsViewModel.speak(textToSpeak)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            if (isSpeaking) Icons.Default.Stop else Icons.Default.VolumeUp,
+                            contentDescription = if (isSpeaking) "Stop Reading" else "Read Aloud",
+                            tint = if (isSpeaking) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                     IconButton(
                         onClick = {
                             viewModel.toggleBookmark(
