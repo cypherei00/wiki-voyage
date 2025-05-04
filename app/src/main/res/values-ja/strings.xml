@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">ウィキペディアアプリ</string>
+
+    <!-- Navigation -->
+    <string name="home">ホーム</string>
+    <string name="search">検索</string>
+    <string name="bookmarks">ブックマーク</string>
+    <string name="game">ゲーム</string>
+    <string name="settings">設定</string>
+    <string name="back">戻る</string>
+    <string name="cancel">キャンセル</string>
+
+    <!-- Home Screen -->
+    <string name="trending_articles">人気の記事</string>
+    <string name="featured_article">特集記事</string>
+    <string name="read_more">続きを読む</string>
+    <string name="error_loading_articles">記事の読み込みエラー</string>
+
+    <!-- Search Screen -->
+    <string name="search_hint">ウィキペディアを検索</string>
+    <string name="recent_searches">最近の検索</string>
+    <string name="clear_history">履歴を消去</string>
+    <string name="no_recent_searches">最近の検索はありません</string>
+    <string name="search_results">検索結果</string>
+    <string name="no_results">結果が見つかりません</string>
+
+    <!-- Article Screen -->
+    <string name="bookmark">ブックマークに追加</string>
+    <string name="unbookmark">ブックマークから削除</string>
+    <string name="share">共有</string>
+    <string name="read_aloud">音声読み上げ</string>
+    <string name="stop_reading">読み上げ停止</string>
+    <string name="error_loading_article">記事の読み込みエラー</string>
+
+    <!-- Bookmarks Screen -->
+    <string name="no_bookmarks">ブックマークはありません</string>
+    <string name="remove_bookmark">ブックマークを削除</string>
+
+    <!-- Game Screen -->
+    <string name="start_game">ゲーム開始</string>
+    <string name="play_again">もう一度プレイ</string>
+    <string name="score">スコア：%1$d</string>
+    <string name="game_over">ゲームオーバー！</string>
+    <string name="final_score">最終スコア：%1$d</string>
+    <string name="correct">正解！</string>
+    <string name="incorrect">不正解！</string>
+    <string name="next_question">次の問題</string>
+
+    <!-- Settings Screen -->
+    <string name="language">言語</string>
+    <string name="theme">テーマ</string>
+    <string name="dark_mode">ダークモード</string>
+    <string name="system_default">システムデフォルト</string>
+    <string name="light">ライト</string>
+    <string name="dark">ダーク</string>
+
+    <!-- Language Selection Screen -->
+    <string name="language_selection">言語を選択</string>
+    <string name="current_language">現在の言語</string>
+
+    <!-- Accessibility -->
+    <string name="tts_not_available">音声合成が利用できません</string>
+    <string name="tts_error">音声合成エラー</string>
+    <string name="tts_stopped">音声合成を停止しました</string>
+    <string name="tts_started">音声合成を開始しました</string>
+</resources> 

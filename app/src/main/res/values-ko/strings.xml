@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">위키피디아 앱</string>
+
+    <!-- Navigation -->
+    <string name="home">홈</string>
+    <string name="search">검색</string>
+    <string name="bookmarks">북마크</string>
+    <string name="game">게임</string>
+    <string name="settings">설정</string>
+    <string name="back">뒤로</string>
+    <string name="cancel">취소</string>
+
+    <!-- Home Screen -->
+    <string name="trending_articles">인기 기사</string>
+    <string name="featured_article">주요 기사</string>
+    <string name="read_more">더 보기</string>
+    <string name="error_loading_articles">기사 로딩 오류</string>
+
+    <!-- Search Screen -->
+    <string name="search_hint">위키피디아 검색</string>
+    <string name="recent_searches">최근 검색</string>
+    <string name="clear_history">기록 지우기</string>
+    <string name="no_recent_searches">최근 검색 없음</string>
+    <string name="search_results">검색 결과</string>
+    <string name="no_results">결과 없음</string>
+
+    <!-- Article Screen -->
+    <string name="bookmark">북마크 추가</string>
+    <string name="unbookmark">북마크 제거</string>
+    <string name="share">공유</string>
+    <string name="read_aloud">소리로 읽기</string>
+    <string name="stop_reading">읽기 중지</string>
+    <string name="error_loading_article">기사 로딩 오류</string>
+
+    <!-- Bookmarks Screen -->
+    <string name="no_bookmarks">저장된 북마크 없음</string>
+    <string name="remove_bookmark">북마크 제거</string>
+
+    <!-- Game Screen -->
+    <string name="start_game">게임 시작</string>
+    <string name="play_again">다시 하기</string>
+    <string name="score">점수: %1$d</string>
+    <string name="game_over">게임 종료!</string>
+    <string name="final_score">최종 점수: %1$d</string>
+    <string name="correct">정답!</string>
+    <string name="incorrect">오답!</string>
+    <string name="next_question">다음 문제</string>
+
+    <!-- Settings Screen -->
+    <string name="language">언어</string>
+    <string name="theme">테마</string>
+    <string name="dark_mode">다크 모드</string>
+    <string name="system_default">시스템 기본값</string>
+    <string name="light">라이트</string>
+    <string name="dark">다크</string>
+
+    <!-- Language Selection Screen -->
+    <string name="language_selection">언어 선택</string>
+    <string name="current_language">현재 언어</string>
+
+    <!-- Accessibility -->
+    <string name="tts_not_available">음성 합성이 사용할 수 없음</string>
+    <string name="tts_error">음성 합성 오류</string>
+    <string name="tts_stopped">음성 합성 중지됨</string>
+    <string name="tts_started">음성 합성 시작됨</string>
+</resources> 

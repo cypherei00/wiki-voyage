@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Application Wikipedia</string>
+
+    <!-- Navigation -->
+    <string name="home">Accueil</string>
+    <string name="search">Rechercher</string>
+    <string name="bookmarks">Favoris</string>
+    <string name="game">Jeu</string>
+    <string name="settings">Paramètres</string>
+    <string name="back">Retour</string>
+    <string name="cancel">Annuler</string>
+
+    <!-- Home Screen -->
+    <string name="trending_articles">Articles Tendances</string>
+    <string name="featured_article">Article en Vedette</string>
+    <string name="read_more">Lire la Suite</string>
+    <string name="error_loading_articles">Erreur lors du chargement des articles</string>
+
+    <!-- Search Screen -->
+    <string name="search_hint">Rechercher sur Wikipedia</string>
+    <string name="recent_searches">Recherches Récentes</string>
+    <string name="clear_history">Effacer l\'Historique</string>
+    <string name="no_recent_searches">Aucune recherche récente</string>
+    <string name="search_results">Résultats de Recherche</string>
+    <string name="no_results">Aucun résultat trouvé</string>
+
+    <!-- Article Screen -->
+    <string name="bookmark">Ajouter aux Favoris</string>
+    <string name="unbookmark">Retirer des Favoris</string>
+    <string name="share">Partager</string>
+    <string name="read_aloud">Lire à Voix Haute</string>
+    <string name="stop_reading">Arrêter la Lecture</string>
+    <string name="error_loading_article">Erreur lors du chargement de l\'article</string>
+
+    <!-- Bookmarks Screen -->
+    <string name="no_bookmarks">Aucun favori enregistré</string>
+    <string name="remove_bookmark">Supprimer le Favori</string>
+
+    <!-- Game Screen -->
+    <string name="start_game">Commencer le Jeu</string>
+    <string name="play_again">Rejouer</string>
+    <string name="score">Score : %1$d</string>
+    <string name="game_over">Partie Terminée !</string>
+    <string name="final_score">Score Final : %1$d</string>
+    <string name="correct">Correct !</string>
+    <string name="incorrect">Incorrect !</string>
+    <string name="next_question">Question Suivante</string>
+
+    <!-- Settings Screen -->
+    <string name="language">Langue</string>
+    <string name="theme">Thème</string>
+    <string name="dark_mode">Mode Sombre</string>
+    <string name="system_default">Par Défaut du Système</string>
+    <string name="light">Clair</string>
+    <string name="dark">Sombre</string>
+
+    <!-- Language Selection Screen -->
+    <string name="language_selection">Sélectionner la Langue</string>
+    <string name="current_language">Langue Actuelle</string>
+
+    <!-- Accessibility -->
+    <string name="tts_not_available">La synthèse vocale n\'est pas disponible</string>
+    <string name="tts_error">Erreur de synthèse vocale</string>
+    <string name="tts_stopped">Synthèse vocale arrêtée</string>
+    <string name="tts_started">Synthèse vocale démarrée</string>
+</resources> 

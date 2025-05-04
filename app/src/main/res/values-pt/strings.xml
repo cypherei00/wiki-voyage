@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Aplicativo Wikipedia</string>
+
+    <!-- Navigation -->
+    <string name="home">Início</string>
+    <string name="search">Pesquisar</string>
+    <string name="bookmarks">Favoritos</string>
+    <string name="game">Jogo</string>
+    <string name="settings">Configurações</string>
+    <string name="back">Voltar</string>
+    <string name="cancel">Cancelar</string>
+
+    <!-- Home Screen -->
+    <string name="trending_articles">Artigos Populares</string>
+    <string name="featured_article">Artigo em Destaque</string>
+    <string name="read_more">Ler Mais</string>
+    <string name="error_loading_articles">Erro ao carregar artigos</string>
+
+    <!-- Search Screen -->
+    <string name="search_hint">Pesquisar na Wikipedia</string>
+    <string name="recent_searches">Pesquisas Recentes</string>
+    <string name="clear_history">Limpar Histórico</string>
+    <string name="no_recent_searches">Nenhuma pesquisa recente</string>
+    <string name="search_results">Resultados da Pesquisa</string>
+    <string name="no_results">Nenhum resultado encontrado</string>
+
+    <!-- Article Screen -->
+    <string name="bookmark">Adicionar aos Favoritos</string>
+    <string name="unbookmark">Remover dos Favoritos</string>
+    <string name="share">Compartilhar</string>
+    <string name="read_aloud">Ler em Voz Alta</string>
+    <string name="stop_reading">Parar Leitura</string>
+    <string name="error_loading_article">Erro ao carregar artigo</string>
+
+    <!-- Bookmarks Screen -->
+    <string name="no_bookmarks">Nenhum favorito salvo</string>
+    <string name="remove_bookmark">Remover Favorito</string>
+
+    <!-- Game Screen -->
+    <string name="start_game">Iniciar Jogo</string>
+    <string name="play_again">Jogar Novamente</string>
+    <string name="score">Pontuação: %1$d</string>
+    <string name="game_over">Fim de Jogo!</string>
+    <string name="final_score">Pontuação Final: %1$d</string>
+    <string name="correct">Correto!</string>
+    <string name="incorrect">Incorreto!</string>
+    <string name="next_question">Próxima Pergunta</string>
+
+    <!-- Settings Screen -->
+    <string name="language">Idioma</string>
+    <string name="theme">Tema</string>
+    <string name="dark_mode">Modo Escuro</string>
+    <string name="system_default">Padrão do Sistema</string>
+    <string name="light">Claro</string>
+    <string name="dark">Escuro</string>
+
+    <!-- Language Selection Screen -->
+    <string name="language_selection">Selecionar Idioma</string>
+    <string name="current_language">Idioma Atual</string>
+
+    <!-- Accessibility -->
+    <string name="tts_not_available">Síntese de voz não disponível</string>
+    <string name="tts_error">Erro na síntese de voz</string>
+    <string name="tts_stopped">Síntese de voz parada</string>
+    <string name="tts_started">Síntese de voz iniciada</string>
+</resources> 

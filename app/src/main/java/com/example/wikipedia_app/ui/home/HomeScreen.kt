@@ -68,62 +68,6 @@ fun HomeScreen(
                 )
             )
         },
-        bottomBar = {
-            NavigationBar(containerColor = TealCyan) {
-
-                NavigationBarItem(
-                    icon = { 
-                        Icon(
-                            Icons.Default.Bookmark, 
-                            contentDescription = "Bookmarks",
-                            tint = CreamOffWhite
-                        ) 
-                    },
-                    label = { 
-                        Text(
-                            "Bookmarks",
-                            color = CreamOffWhite
-                        ) 
-                    },
-                    selected = false,
-                    onClick = { navController.navigate(Screen.Bookmarks.route) }
-                )
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = CreamOffWhite
-                        )
-                    },
-                    label = {
-                        Text(
-                            "Search",
-                            color = CreamOffWhite
-                        )
-                    },
-                    selected = false,
-                    onClick = { navController.navigate(Screen.Search.route) }
-                )
-                NavigationBarItem(
-                    icon = { 
-                        Icon(
-                            Icons.Default.Settings, 
-                            contentDescription = "Settings",
-                            tint = CreamOffWhite
-                        ) 
-                    },
-                    label = { 
-                        Text(
-                            "Settings",
-                            color = CreamOffWhite
-                        ) 
-                    },
-                    selected = false,
-                    onClick = { navController.navigate(Screen.Settings.route) }
-                )
-            }
-        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate(Screen.Game.route) },
@@ -146,8 +90,8 @@ fun HomeScreen(
             }
         } else if (error != null) {
             Box(
-            modifier = Modifier
-                .fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
@@ -165,7 +109,7 @@ fun HomeScreen(
             ) {
                 // Today's Featured Article
                 featuredContent?.today?.let { article ->
-                item {
+                    item {
                         FeaturedArticleCard(
                             title = "Today's Featured Article",
                             article = article,
@@ -217,7 +161,7 @@ fun HomeScreen(
                             article = article,
                             onClick = {
                                 navController.navigate(Screen.Article.createRoute(article.title))
-                                }
+                            }
                         )
                     }
                 }

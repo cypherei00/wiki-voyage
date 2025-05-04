@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Приложение Википедия</string>
+
+    <!-- Navigation -->
+    <string name="home">Главная</string>
+    <string name="search">Поиск</string>
+    <string name="bookmarks">Закладки</string>
+    <string name="game">Игра</string>
+    <string name="settings">Настройки</string>
+    <string name="back">Назад</string>
+    <string name="cancel">Отмена</string>
+
+    <!-- Home Screen -->
+    <string name="trending_articles">Популярные статьи</string>
+    <string name="featured_article">Избранная статья</string>
+    <string name="read_more">Читать далее</string>
+    <string name="error_loading_articles">Ошибка загрузки статей</string>
+
+    <!-- Search Screen -->
+    <string name="search_hint">Поиск в Википедии</string>
+    <string name="recent_searches">Недавние поиски</string>
+    <string name="clear_history">Очистить историю</string>
+    <string name="no_recent_searches">Нет недавних поисков</string>
+    <string name="search_results">Результаты поиска</string>
+    <string name="no_results">Результаты не найдены</string>
+
+    <!-- Article Screen -->
+    <string name="bookmark">Добавить в закладки</string>
+    <string name="unbookmark">Удалить из закладок</string>
+    <string name="share">Поделиться</string>
+    <string name="read_aloud">Читать вслух</string>
+    <string name="stop_reading">Остановить чтение</string>
+    <string name="error_loading_article">Ошибка загрузки статьи</string>
+
+    <!-- Bookmarks Screen -->
+    <string name="no_bookmarks">Нет сохраненных закладок</string>
+    <string name="remove_bookmark">Удалить закладку</string>
+
+    <!-- Game Screen -->
+    <string name="start_game">Начать игру</string>
+    <string name="play_again">Играть снова</string>
+    <string name="score">Счет: %1$d</string>
+    <string name="game_over">Игра окончена!</string>
+    <string name="final_score">Итоговый счет: %1$d</string>
+    <string name="correct">Правильно!</string>
+    <string name="incorrect">Неправильно!</string>
+    <string name="next_question">Следующий вопрос</string>
+
+    <!-- Settings Screen -->
+    <string name="language">Язык</string>
+    <string name="theme">Тема</string>
+    <string name="dark_mode">Темная тема</string>
+    <string name="system_default">Системная</string>
+    <string name="light">Светлая</string>
+    <string name="dark">Темная</string>
+
+    <!-- Language Selection Screen -->
+    <string name="language_selection">Выбрать язык</string>
+    <string name="current_language">Текущий язык</string>
+
+    <!-- Accessibility -->
+    <string name="tts_not_available">Речевой синтез недоступен</string>
+    <string name="tts_error">Ошибка речевого синтеза</string>
+    <string name="tts_stopped">Речевой синтез остановлен</string>
+    <string name="tts_started">Речевой синтез запущен</string>
+</resources> 

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">维基百科应用</string>
+
+    <!-- Navigation -->
+    <string name="home">首页</string>
+    <string name="search">搜索</string>
+    <string name="bookmarks">书签</string>
+    <string name="game">游戏</string>
+    <string name="settings">设置</string>
+    <string name="back">返回</string>
+    <string name="cancel">取消</string>
+
+    <!-- Home Screen -->
+    <string name="trending_articles">热门文章</string>
+    <string name="featured_article">特色文章</string>
+    <string name="read_more">阅读更多</string>
+    <string name="error_loading_articles">加载文章时出错</string>
+
+    <!-- Search Screen -->
+    <string name="search_hint">搜索维基百科</string>
+    <string name="recent_searches">最近搜索</string>
+    <string name="clear_history">清除历史</string>
+    <string name="no_recent_searches">没有最近的搜索</string>
+    <string name="search_results">搜索结果</string>
+    <string name="no_results">未找到结果</string>
+
+    <!-- Article Screen -->
+    <string name="bookmark">添加书签</string>
+    <string name="unbookmark">移除书签</string>
+    <string name="share">分享</string>
+    <string name="read_aloud">朗读</string>
+    <string name="stop_reading">停止朗读</string>
+    <string name="error_loading_article">加载文章时出错</string>
+
+    <!-- Bookmarks Screen -->
+    <string name="no_bookmarks">暂无书签</string>
+    <string name="remove_bookmark">移除书签</string>
+
+    <!-- Game Screen -->
+    <string name="start_game">开始游戏</string>
+    <string name="play_again">再玩一次</string>
+    <string name="score">得分：%1$d</string>
+    <string name="game_over">游戏结束！</string>
+    <string name="final_score">最终得分：%1$d</string>
+    <string name="correct">正确！</string>
+    <string name="incorrect">错误！</string>
+    <string name="next_question">下一题</string>
+
+    <!-- Settings Screen -->
+    <string name="language">语言</string>
+    <string name="theme">主题</string>
+    <string name="dark_mode">深色模式</string>
+    <string name="system_default">系统默认</string>
+    <string name="light">浅色</string>
+    <string name="dark">深色</string>
+
+    <!-- Language Selection Screen -->
+    <string name="language_selection">选择语言</string>
+    <string name="current_language">当前语言</string>
+
+    <!-- Accessibility -->
+    <string name="tts_not_available">语音合成不可用</string>
+    <string name="tts_error">语音合成错误</string>
+    <string name="tts_stopped">语音合成已停止</string>
+    <string name="tts_started">语音合成已开始</string>
+</resources> 
