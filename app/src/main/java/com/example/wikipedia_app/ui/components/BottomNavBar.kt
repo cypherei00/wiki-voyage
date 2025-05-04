@@ -11,6 +11,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.wikipedia_app.R
 import com.example.wikipedia_app.navigation.Screen
+import com.example.wikipedia_app.ui.theme.TealCyan
+import com.example.wikipedia_app.ui.theme.CreamOffWhite
 
 data class BottomNavItem(
     val route: String,
@@ -28,7 +30,10 @@ fun BottomNavBar(navController: NavController) {
         BottomNavItem(Screen.Settings.route, Icons.Default.Settings, R.string.settings)
     )
 
-    NavigationBar {
+    NavigationBar(
+        containerColor = TealCyan,
+        contentColor = CreamOffWhite
+    ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
@@ -44,7 +49,14 @@ fun BottomNavBar(navController: NavController) {
                             launchSingleTop = true
                         }
                     }
-                }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = CreamOffWhite,
+                    unselectedIconColor = CreamOffWhite.copy(alpha = 0.7f),
+                    selectedTextColor = CreamOffWhite,
+                    unselectedTextColor = CreamOffWhite.copy(alpha = 0.7f),
+                    indicatorColor = TealCyan.copy(alpha = 0.8f)
+                )
             )
         }
     }
