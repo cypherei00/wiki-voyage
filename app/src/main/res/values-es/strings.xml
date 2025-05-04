@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Aplicación Wikipedia</string>
+
+    <!-- Navigation -->
+    <string name="home">Inicio</string>
+    <string name="search">Buscar</string>
+    <string name="bookmarks">Marcadores</string>
+    <string name="game">Juego</string>
+    <string name="settings">Ajustes</string>
+    <string name="back">Atrás</string>
+    <string name="cancel">Cancelar</string>
+
+    <!-- Home Screen -->
+    <string name="trending_articles">Artículos Populares</string>
+    <string name="featured_article">Artículo Destacado</string>
+    <string name="read_more">Leer Más</string>
+    <string name="error_loading_articles">Error al cargar artículos</string>
+
+    <!-- Search Screen -->
+    <string name="search_hint">Buscar en Wikipedia</string>
+    <string name="recent_searches">Búsquedas Recientes</string>
+    <string name="clear_history">Borrar Historial</string>
+    <string name="no_recent_searches">No hay búsquedas recientes</string>
+    <string name="search_results">Resultados de Búsqueda</string>
+    <string name="no_results">No se encontraron resultados</string>
+
+    <!-- Article Screen -->
+    <string name="bookmark">Guardar</string>
+    <string name="unbookmark">Quitar de Guardados</string>
+    <string name="share">Compartir</string>
+    <string name="read_aloud">Leer en Voz Alta</string>
+    <string name="stop_reading">Detener Lectura</string>
+    <string name="error_loading_article">Error al cargar el artículo</string>
+
+    <!-- Bookmarks Screen -->
+    <string name="no_bookmarks">No hay marcadores guardados</string>
+    <string name="remove_bookmark">Eliminar Marcador</string>
+
+    <!-- Game Screen -->
+    <string name="start_game">Iniciar Juego</string>
+    <string name="play_again">Jugar de Nuevo</string>
+    <string name="score">Puntuación: %1$d</string>
+    <string name="game_over">¡Juego Terminado!</string>
+    <string name="final_score">Puntuación Final: %1$d</string>
+    <string name="correct">¡Correcto!</string>
+    <string name="incorrect">¡Incorrecto!</string>
+    <string name="next_question">Siguiente Pregunta</string>
+
+    <!-- Settings Screen -->
+    <string name="language">Idioma</string>
+    <string name="theme">Tema</string>
+    <string name="dark_mode">Modo Oscuro</string>
+    <string name="system_default">Predeterminado del Sistema</string>
+    <string name="light">Claro</string>
+    <string name="dark">Oscuro</string>
+
+    <!-- Language Selection Screen -->
+    <string name="language_selection">Seleccionar Idioma</string>
+    <string name="current_language">Idioma Actual</string>
+
+    <!-- Accessibility -->
+    <string name="tts_not_available">La síntesis de voz no está disponible</string>
+    <string name="tts_error">Error con la síntesis de voz</string>
+    <string name="tts_stopped">Síntesis de voz detenida</string>
+    <string name="tts_started">Síntesis de voz iniciada</string>
+</resources> 

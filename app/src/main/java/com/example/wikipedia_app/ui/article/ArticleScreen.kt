@@ -66,6 +66,7 @@ import com.example.wikipedia_app.ui.theme.TealCyan
 import com.example.wikipedia_app.ui.viewmodels.BookmarkViewModel
 import com.example.wikipedia_app.ui.viewmodels.HistoryViewModel
 import com.example.wikipedia_app.ui.viewmodels.TTSViewModel
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -181,7 +182,10 @@ fun ArticleScreen(
                     ) {
                         Icon(
                             if (isSpeaking) Icons.Default.Stop else Icons.Default.VolumeUp,
-                            contentDescription = if (isSpeaking) "Stop Reading" else "Read Aloud",
+                            contentDescription = if (isSpeaking) 
+                                stringResource(R.string.accessibility_tts_stop)
+                            else 
+                                stringResource(R.string.accessibility_tts_play),
                             tint = if (isSpeaking) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -197,7 +201,10 @@ fun ArticleScreen(
                     ) {
                         Icon(
                             imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                            contentDescription = if (isBookmarked) "Remove bookmark" else "Add bookmark",
+                            contentDescription = if (isBookmarked) 
+                                stringResource(R.string.accessibility_bookmark_remove)
+                            else 
+                                stringResource(R.string.accessibility_bookmark_add),
                             tint = if (isBookmarked) CreamOffWhite else MaterialTheme.colorScheme.onSurface
                         )
                     }
