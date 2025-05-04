@@ -68,3 +68,18 @@ data class Warnings(
 data class Warning(
     val warnings: String
 )
+
+data class ArticleDescriptionResponse(
+    val query: DescriptionQuery?,
+    val error: Error? = null
+)
+
+data class DescriptionQuery(
+    val pages: List<DescriptionPage>
+)
+
+data class DescriptionPage(
+    val pageid: Int,
+    val title: String,
+    val extract: String?
+)

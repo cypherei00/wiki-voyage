@@ -2,9 +2,14 @@ package com.example.wikipedia_app.network
 
 import com.example.wikipedia_app.model.ArticleResponse
 import com.example.wikipedia_app.model.WikipediaResponse
+import com.example.wikipedia_app.model.ArticleDescriptionResponse
+import com.example.wikipedia_app.model.FeaturedArticleResponse
+import com.example.wikipedia_app.model.TrendingArticleResponse
+//import com.example.wikipedia_app.model.TrendingResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 import retrofit2.Call
+import retrofit2.http.Path
 
 interface WikipediaApiService {
     @GET("w/api.php?action=query&list=search&format=json")
@@ -27,4 +32,28 @@ interface WikipediaApiService {
         @Query("disableeditsection") disableEditSection: Boolean = true,
         @Query("disabletoc") disableToc: Boolean = false
     ): Call<ArticleResponse>
+
+    @GET("w/api.php?action=query&format=json")
+    fun getArticleDescription(
+        @Query("titles") title: String,
+        @Query("prop") props: String = "extracts",
+        @Query("exintro") exintro: Boolean = true,
+        @Query("explaintext") explaintext: Boolean = true,
+        @Query("formatversion") formatVersion: Int = 2
+    ): Call<ArticleDescriptionResponse>
+
+    @GET("api/rest_v1/feed/featured/{year}/{month}/{day}")
+    fun getFeaturedContent(
+        @Path("year") year: String,
+        @Path("month") month: String,
+        @Path("day") day: String
+    ): Call<FeaturedArticleResponse>
+
+    @GET("api/rest_v1/metrics/pageviews/top/en.wikipedia/all-access/{year}/{month}/{day}")
+    fun getTrendingArticles(
+        @Path("year") year: String,
+        @Path("month") month: String,
+        @Path("day") day: String
+    ): Call<TrendingArticleResponse>
+
 }

@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.*
@@ -16,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.wikipedia_app.data.Bookmark
 import com.example.wikipedia_app.model.ArticleContent
 import com.example.wikipedia_app.model.ArticleResponse
 import com.example.wikipedia_app.model.ArticleSection
@@ -38,66 +41,101 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import coil.compose.AsyncImage
 import com.example.wikipedia_app.R
+import com.example.wikipedia_app.model.ArticleDescriptionResponse
+import com.example.wikipedia_app.navigation.Screen
+import com.example.wikipedia_app.ui.theme.BackgroundBeige
+import com.example.wikipedia_app.ui.theme.CreamOffWhite
+import com.example.wikipedia_app.ui.theme.DarkBrown
+import com.example.wikipedia_app.ui.theme.TealCyan
+import com.example.wikipedia_app.ui.viewmodels.BookmarkViewModel
+import com.example.wikipedia_app.ui.viewmodels.HistoryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ArticleScreen(title: String, navController: NavController) {
+fun ArticleScreen(
+    navController: NavController,
+    title: String,
+    viewModel: BookmarkViewModel,
+    historyViewModel: HistoryViewModel
+) {
     var articleContent by remember { mutableStateOf<ArticleContent?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
+    var articleDescription by remember { mutableStateOf<String?>(null) }
+    var articleImages by remember { mutableStateOf<List<String>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var sectionsLoaded by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val isBookmarked by viewModel.isBookmarked.collectAsState()
 
     LaunchedEffect(title) {
+        viewModel.checkBookmarkStatus(title)
+        historyViewModel.addToHistory(title, "https://en.wikipedia.org/wiki/$title")
         isLoading = true
+        sectionsLoaded = false
+        Log.d("ARTICLE_LOADING", "Starting to load article: $title")
+        
+        RetrofitInstance.api.getArticleDescription(title).enqueue(object : Callback<ArticleDescriptionResponse> {
+            override fun onResponse(call: Call<ArticleDescriptionResponse>, response: Response<ArticleDescriptionResponse>) {
+                Log.d("ARTICLE_DESC", "Description response received: ${response.isSuccessful}")
+                articleDescription = response.body()?.query?.pages?.firstOrNull()?.extract
+                Log.d("ARTICLE_DESC", "Description content: $articleDescription")
+            }
+            override fun onFailure(call: Call<ArticleDescriptionResponse>, t: Throwable) {
+                Log.e("ARTICLE_DESC", "Failed to get description: ${t.message}")
+            }
+        })
+
         RetrofitInstance.api.getArticleContent(title).enqueue(object : Callback<ArticleResponse> {
             override fun onResponse(call: Call<ArticleResponse>, response: Response<ArticleResponse>) {
-                isLoading = false
                 if (response.isSuccessful) {
-                    val articleResponse = response.body()
-                    
-                    when {
-                        articleResponse?.error != null -> {
-                            Toast.makeText(context, articleResponse.error.info, Toast.LENGTH_SHORT).show()
-                            Log.e("ARTICLE_ERROR", "Error: ${articleResponse.error.code} - ${articleResponse.error.info}")
-                        }
-                        articleResponse?.parse != null -> {
-                            val sections = articleResponse.parse.sections ?: emptyList()
-                            
-                            if (sections.isNotEmpty()) {
-                                // Process the sections into a structured format
-                                val processedContent = processArticleContent(
-                                    title = articleResponse.parse.displaytitle ?: title,
-                                    sections = sections
-                                )
-                                articleContent = processedContent
-                                
-                                // Fetch content for each section
-                                fetchSectionContents(processedContent.sections, title)
-                            } else {
-                                Toast.makeText(context, "No sections available", Toast.LENGTH_SHORT).show()
-                                Log.e("ARTICLE_ERROR", "No sections in response")
-                            }
-                        }
-                        else -> {
-                            Toast.makeText(context, "No content available", Toast.LENGTH_SHORT).show()
-                            Log.e("ARTICLE_ERROR", "No content in response")
+                    response.body()?.parse?.let { parse ->
+                        Log.d("ARTICLE_CONTENT", "Parse object received: ${parse.sections?.size} sections")
+                        
+                        articleImages = parse.images
+                            ?.filter { it.endsWith(".jpg", true) || it.endsWith(".png", true) }
+                            ?.map { "https://en.wikipedia.org/wiki/Special:FilePath/${it.removePrefix("File:")}" }
+                            ?.distinct()
+                            ?.take(3)
+                            ?: emptyList()
+
+                        Log.d("ARTICLE_IMAGES", "Found ${articleImages.size} images")
+
+                        articleContent = processArticleContent(
+                            title = parse.displaytitle ?: title,
+                            sections = parse.sections ?: emptyList()
+                        )
+                        Log.d("ARTICLE_SECTIONS", "Processed ${articleContent?.sections?.size} sections")
+                        
+                        // Fetch section contents and update loading state
+                        fetchSectionContents(articleContent!!.sections, title) {
+                            sectionsLoaded = true
+                            isLoading = false
                         }
                     }
                 } else {
-                    Toast.makeText(context, "Failed to load article: ${response.code()}", Toast.LENGTH_SHORT).show()
-                    Log.e("ARTICLE_ERROR", "Error fetching article. Code: ${response.code()}, ErrorBody: ${response.errorBody()?.string()}")
+                    Log.e("ARTICLE_CONTENT", "Failed to load article: ${response.code()}")
+                    error = "Failed to load article"
+                    isLoading = false
                 }
             }
-
             override fun onFailure(call: Call<ArticleResponse>, t: Throwable) {
+                Log.e("ARTICLE_CONTENT", "Network Error: ${t.message}")
+                error = "Network Error: ${t.message}"
                 isLoading = false
-                Toast.makeText(context, "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                Log.e("ARTICLE_ERROR", "Network Failure: ${t.message}")
             }
         })
     }
@@ -105,201 +143,187 @@ fun ArticleScreen(title: String, navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(articleContent?.title ?: title) },
+                title = {
+                    Text(
+                        text = "WIKI-VOYAGE",
+                        color = CreamOffWhite,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = CreamOffWhite)
                     }
-                }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            viewModel.toggleBookmark(
+                                Bookmark(
+                                    title = title,
+                                    url = "https://en.wikipedia.org/wiki/$title"
+                                )
+                            )
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                            contentDescription = if (isBookmarked) "Remove bookmark" else "Add bookmark",
+                            tint = if (isBookmarked) CreamOffWhite else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = TealCyan,
+                    titleContentColor = CreamOffWhite
+                )
             )
         }
-    ) { paddingValues ->
+    ) { padding ->
         if (isLoading) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                modifier = Modifier.fillMaxSize().padding(padding),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
             }
+        } else if (error != null) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = error!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         } else {
             LazyColumn(
                 modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp)
+                    .fillMaxSize()
+                    .background(BackgroundBeige)
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
             ) {
-                articleContent?.sections?.let { sections ->
-                    items(sections) { section ->
-                        ArticleSection(section = section)
-                    }
+                item {
+                    Text(
+                        text = articleContent?.title ?: title,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = DarkBrown
+                        ),
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
                 }
-            }
-        }
-    }
-}
 
-@Composable
-fun ArticleSection(section: ArticleSection) {
-    // Use rememberSaveable to persist the expanded state
-    var isExpanded by rememberSaveable(section.title) { 
-        mutableStateOf(section.level <= 2) 
-    }
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        // Section title with different styling based on level
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { 
-                    isExpanded = !isExpanded 
-                }
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = section.title,
-                style = when (section.level) {
-                    1 -> MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                    2 -> MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = primaryColor
-                    )
-                    3 -> MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    else -> MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Medium
-                    )
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .background(
-                        if (section.level == 1) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                        else Color.Transparent
-                    )
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-
-            // Expand/Collapse icon
-            if (section.subsections.isNotEmpty() || section.content.isNotEmpty()) {
-                Icon(
-                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = if (isExpanded) "Collapse section" else "Expand section",
-                    tint = primaryColor,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-            }
-        }
-
-        // Animated visibility for smooth transitions
-        AnimatedVisibility(
-            visible = isExpanded,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            Column {
-                // Section content with improved formatting
-                if (section.content.isNotEmpty()) {
-                    Card(
+                items(articleImages) { imageUrl ->
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                        )
-                    ) {
+                            .padding(vertical = 12.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                            .heightIn(min = 200.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                articleDescription?.let {
+                    item {
                         Text(
-                            text = buildAnnotatedString {
-                                val paragraphs = section.content.split("\n\n")
-                                paragraphs.forEachIndexed { index, paragraph ->
-                                    if (index > 0) append("\n\n")
-                                    withStyle(
-                                        style = ParagraphStyle(
-                                            lineHeight = 24.sp,
-                                            textIndent = TextIndent(firstLine = 16.sp)
-                                        )
-                                    ) {
-                                        withStyle(
-                                            style = SpanStyle(
-                                                fontSize = 16.sp
-                                            )
-                                        ) {
-                                            // Handle markdown-style formatting
-                                            var currentText = paragraph
-                                            
-                                            // Handle bullet points
-                                            if (currentText.startsWith("• ")) {
-                                                withStyle(SpanStyle(fontSize = 20.sp)) {
-                                                    append("• ")
-                                                }
-                                                currentText = currentText.substring(2)
-                                            }
-
-                                            // Handle bold text
-                                            while (currentText.contains("**")) {
-                                                val start = currentText.indexOf("**")
-                                                val end = currentText.indexOf("**", start + 2)
-                                                if (end != -1) {
-                                                    append(currentText.substring(0, start))
-                                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                                        append(currentText.substring(start + 2, end))
-                                                    }
-                                                    currentText = currentText.substring(end + 2)
-                                                } else {
-                                                    break
-                                                }
-                                            }
-
-                                            // Handle italic text (including scientific names)
-                                            while (currentText.contains("*")) {
-                                                val start = currentText.indexOf("*")
-                                                val end = currentText.indexOf("*", start + 1)
-                                                if (end != -1) {
-                                                    append(currentText.substring(0, start))
-                                                    val italicText = currentText.substring(start + 1, end)
-                                                    withStyle(SpanStyle(
-                                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                                        color = if (italicText.matches(Regex("[A-Z][a-z]+ [a-z]+|[A-Z][a-z]+"))) 
-                                                            primaryColor
-                                                        else 
-                                                            onSurfaceColor
-                                                    )) {
-                                                        append(italicText)
-                                                    }
-                                                    currentText = currentText.substring(end + 1)
-                                                } else {
-                                                    break
-                                                }
-                                            }
-                                            append(currentText)
-                                        }
-                                    }
-                                }
-                            },
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(16.dp)
+                            text = it,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                lineHeight = 28.sp,
+                                fontSize = 18.sp,
+                                color = DarkBrown,
+                                textAlign = TextAlign.Start
+                            ),
+                            modifier = Modifier.padding(vertical = 12.dp)
+                        )
+                    }
+                    
+                    item {
+                        Divider(
+                            color = DarkBrown.copy(alpha = 0.4f),
+                            thickness = 2.dp,
+                            modifier = Modifier.padding(vertical = 16.dp)
                         )
                     }
                 }
 
-                // Subsections with proper indentation
-                section.subsections.forEach { subsection ->
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .padding(start = (subsection.level - 1) * 16.dp)
-                    ) {
-                        ArticleSection(section = subsection)
+                if (sectionsLoaded) {
+                    articleContent?.sections?.let { sections ->
+                        items(sections) { section ->
+                            if (section.content.isNotEmpty()) {
+                                Column(modifier = Modifier.padding(vertical = 16.dp)) {
+                                    Text(
+                                        text = section.title,
+                                        style = MaterialTheme.typography.headlineSmall.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = TealCyan,
+                                            fontSize = 24.sp
+                                        ),
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+
+                                    val annotatedText = buildAnnotatedString {
+                                        val paragraphs = section.content
+                                            .replace("• ", "\n• ")
+                                            .replace(Regex("\\n{2,}"), "\n")
+                                            .lines()
+                                            .map { it.trimStart() }
+                                            .filter { it.isNotBlank() }
+                                            .map { it.trim() }
+
+                                        paragraphs.forEachIndexed { index, paragraph ->
+                                            if (index > 0) append("\n")
+                                            val isBullet = paragraph.startsWith("•")
+                                            val startsWithDate = paragraph.take(4).all { it.isDigit() }
+                                            val useIndent = !(isBullet || startsWithDate)
+
+                                            val paragraphStyle = ParagraphStyle(
+                                                lineHeight = if (isBullet) 24.sp else 30.sp,
+                                                textIndent = if (useIndent) TextIndent(firstLine = 20.sp) else TextIndent.None
+                                            )
+
+                                            withStyle(paragraphStyle) {
+                                                val lines = paragraph
+                                                    .split("\n")
+                                                    .map { it.replace(Regex("^[ \t]+"), "") }
+
+                                                lines.forEachIndexed { i, line ->
+                                                    if (i > 0) append("\n")
+                                                    appendFormattedLine(line, TealCyan)
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    ClickableText(
+                                        text = annotatedText,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontSize = 18.sp,
+                                            textAlign = TextAlign.Start
+                                        ),
+                                        modifier = Modifier.padding(bottom = 16.dp),
+                                        onClick = { offset ->
+                                            annotatedText.getStringAnnotations("ARTICLE", offset, offset)
+                                                .firstOrNull()?.let { annotation ->
+                                                    navController.navigate(Screen.Article.createRoute(annotation.item))
+                                                }
+                                        }
+                                    )
+
+                                    Divider(
+                                        color = DarkBrown.copy(alpha = 0.4f),
+                                        thickness = 1.dp,
+                                        modifier = Modifier.padding(top = 8.dp)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -307,9 +331,151 @@ fun ArticleSection(section: ArticleSection) {
     }
 }
 
-private fun fetchSectionContents(sections: List<ArticleSection>, title: String) {
+
+fun AnnotatedString.Builder.appendFormattedLine(
+    text: String,
+    primaryColor: Color
+) {
+    // 🔬 Chemical equations with subscript and arrows
+    val chemRegex = Regex("\\[CHEM:(.*?)\\]")
+    val chemMatch = chemRegex.find(text)
+    if (chemMatch != null) {
+        val before = text.substring(0, chemMatch.range.first)
+        val equation = chemMatch.groupValues[1]
+        appendFormattedLine(before, primaryColor)
+
+        val parts = equation.split(Regex("\\s+"))
+        parts.forEachIndexed { index, part ->
+            if (index > 0) append(" ")
+
+            val subscriptRegex = Regex("([A-Za-z]+)(\\d+)")
+            val subMatch = subscriptRegex.find(part)
+            when {
+                subMatch != null -> {
+                    val (base, sub) = subMatch.destructured
+                    append(base)
+                    withStyle(SpanStyle(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 14.sp,
+                        baselineShift = BaselineShift.Subscript
+                    )) {
+                        append(sub)
+                    }
+                }
+                part in listOf("→", "←", "↔") -> {
+                    withStyle(SpanStyle(
+                        color = primaryColor,
+                        fontWeight = FontWeight.Bold
+                    )) {
+                        append(part)
+                    }
+                }
+                else -> {
+                    withStyle(SpanStyle(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 16.sp
+                    )) {
+                        append(part)
+                    }
+                }
+            }
+        }
+
+        val after = text.substring(chemMatch.range.last + 1)
+        appendFormattedLine(after, primaryColor)
+        return
+    }
+
+
+    // ➗ Handle math blocks
+    val mathRegex = Regex("\\[MATH:(.*?)\\]")
+    val mathMatch = mathRegex.find(text)
+    if (mathMatch != null) {
+        val before = text.substring(0, mathMatch.range.first)
+        val mathContent = mathMatch.groupValues[1]
+        appendFormattedLine(before, primaryColor)
+        withStyle(SpanStyle(fontFamily = FontFamily.Monospace)) {
+            append(mathContent)
+        }
+        val after = text.substring(mathMatch.range.last + 1)
+        appendFormattedLine(after, primaryColor)
+        return
+    }
+
+    // 🔗 Handle internal links
+    val linkRegex = Regex("\\[\\[(.*?)\\|(.*?)]]")
+    val matches = linkRegex.findAll(text)
+    if (matches.any()) {
+        var cursor = 0
+        matches.forEach { match ->
+            val before = text.substring(cursor, match.range.first)
+            appendFormattedLine(before, primaryColor)
+
+            val (displayText, target) = match.destructured
+            pushStringAnnotation(tag = "ARTICLE", annotation = target)
+            withStyle(SpanStyle(color = primaryColor, textDecoration = TextDecoration.Underline)) {
+                appendFormattedLine(displayText, primaryColor)
+            }
+            pop()
+            cursor = match.range.last + 1
+        }
+        if (cursor < text.length) {
+            appendFormattedLine(text.substring(cursor), primaryColor)
+        }
+        return
+    }
+
+    // 🧠 Bold & Italic
+    var remaining = text
+    while (remaining.isNotEmpty()) {
+        val boldStart = remaining.indexOf("**")
+        val italicStart = remaining.indexOf("*")
+
+        when {
+            boldStart != -1 && (italicStart == -1 || boldStart < italicStart) -> {
+                append(remaining.substring(0, boldStart))
+                val end = remaining.indexOf("**", boldStart + 2)
+                if (end != -1) {
+                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(remaining.substring(boldStart + 2, end))
+                    }
+                    remaining = remaining.substring(end + 2)
+                } else {
+                    append(remaining)
+                    break
+                }
+            }
+
+            italicStart != -1 -> {
+                append(remaining.substring(0, italicStart))
+                val end = remaining.indexOf("*", italicStart + 1)
+                if (end != -1) {
+                    withStyle(SpanStyle(fontStyle = FontStyle.Italic, color = primaryColor)) {
+                        append(remaining.substring(italicStart + 1, end))
+                    }
+                    remaining = remaining.substring(end + 1)
+                } else {
+                    append(remaining)
+                    break
+                }
+            }
+
+            else -> {
+                append(remaining)
+                break
+            }
+        }
+    }
+}
+
+private fun fetchSectionContents(sections: List<ArticleSection>, title: String, onComplete: () -> Unit) {
+    Log.d("SECTION_FETCH", "Starting to fetch ${sections.size} sections")
+    var completedSections = 0
+    val totalSections = sections.size
+
     sections.forEach { section ->
-        // Fetch content for this section using the section index
+        Log.d("SECTION_FETCH", "Fetching content for section: ${section.title} (index: ${section.sectionIndex})")
+
         RetrofitInstance.api.getArticleContent(
             title = title,
             section = section.sectionIndex
@@ -317,21 +483,55 @@ private fun fetchSectionContents(sections: List<ArticleSection>, title: String) 
             override fun onResponse(call: Call<ArticleResponse>, response: Response<ArticleResponse>) {
                 if (response.isSuccessful) {
                     val articleResponse = response.body()
-                    if (articleResponse?.parse?.text != null) {
-                        // Update the section content
-                        section.content = processHtmlContent(articleResponse.parse.text)
+                    val rawHtml = articleResponse?.parse?.text ?: ""
+                    Log.d("SECTION_RAW", "Raw HTML length for '${section.title}': ${rawHtml.length}")
+
+                    try {
+                        val processed = processHtmlContent(rawHtml)
+                        Log.d("SECTION_PROCESSED", "Processed content length for '${section.title}': ${processed.length}")
+
+                        val cleaned = processed
+                            .removePrefix(section.title)
+                            .removePrefix("Edit")
+                            .trim()
+
+                        val formatted = cleaned
+                            .replace("• ", "\n• ")
+                            .replace(Regex("\\n{3,}"), "\n\n")
+                            .trim()
+
+                        section.content = formatted
+                        Log.d("SECTION_FINAL", "Final content for '${section.title}': ${formatted.take(100)}...")
+                    } catch (e: Exception) {
+                        Log.e("SECTION_PROCESSING", "Error processing section ${section.title}: ${e.message}", e)
+                        section.content = "Error loading content for this section."
                     }
+                } else {
+                    Log.e("SECTION_ERROR", "Failed to fetch section ${section.title}: ${response.code()}")
+                    section.content = "Error loading content for this section."
+                }
+
+                completedSections++
+                if (completedSections == totalSections) {
+                    onComplete()
                 }
             }
 
             override fun onFailure(call: Call<ArticleResponse>, t: Throwable) {
-                Log.e("SECTION_ERROR", "Failed to fetch section content: ${t.message}")
+                Log.e("SECTION_ERROR", "Failed to fetch section ${section.title}: ${t.message}", t)
+                section.content = "Error loading content for this section."
+                
+                completedSections++
+                if (completedSections == totalSections) {
+                    onComplete()
+                }
             }
         })
 
-        // Recursively fetch content for subsections
+        // Recursively fetch subsection content
         if (section.subsections.isNotEmpty()) {
-            fetchSectionContents(section.subsections, title)
+            Log.d("SUBSECTION_FETCH", "Fetching ${section.subsections.size} subsections for ${section.title}")
+            fetchSectionContents(section.subsections, title, onComplete)
         }
     }
 }
@@ -341,7 +541,7 @@ private fun processArticleContent(
     sections: List<Section>
 ): ArticleContent {
     val processedSections = mutableListOf<ArticleSection>()
-    
+
     // Process each section
     sections.forEach { section ->
         val subsection = ArticleSection(
@@ -363,6 +563,7 @@ private fun cleanHtmlTags(text: String): String {
     return text
         .replace(Regex("<[^>]+>"), "")
         .replace(Regex("&[^;]+;"), "")
+        .replace(Regex("\\[edit\\]"), "")
         .trim()
 }
 
@@ -379,8 +580,13 @@ private fun processHtmlContent(html: String): String {
         .replace(Regex("<sup[^>]*>.*?</sup>"), "") // Remove superscripts
         .replace(Regex("<i>|</i>"), "*") // Convert italics to markdown
         .replace(Regex("<b>|</b>"), "**") // Convert bold to markdown
-        .replace(Regex("<a[^>]*>|</a>"), "") // Remove links but keep their text
-        .replace(Regex("<p[^>]*>|</p>"), "\n\n") // Convert paragraphs to newlines
+        .replace(Regex("<a[^>]*href=\"/wiki/([^\"]+)\"[^>]*>(.*?)</a>")) {
+            val linkTarget = it.groupValues[1]
+            val linkText = it.groupValues[2]
+            "[[$linkText|$linkTarget]]"
+        }
+        .replace(Regex("<a[^>]*>|</a>"), "")
+        .replace(Regex("<p[^>]*>|</p>"), "\n") // Convert paragraphs to newlines
         .replace(Regex("<br[^>]*>"), "\n") // Convert line breaks
         .replace(Regex("<ul>|</ul>"), "\n") // Convert unordered lists
         .replace(Regex("<ol>|</ol>"), "\n") // Convert ordered lists
@@ -388,15 +594,59 @@ private fun processHtmlContent(html: String): String {
         .replace(Regex("</li>"), "\n") // End list items with newline
         .replace(Regex("\\[\\d+\\]"), "") // Remove citation numbers
         .replace(Regex("\\s+"), " ") // Normalize whitespace
-        .trim()
+        .replace("&gt;", ">")
+        .replace("&lt;", "<")
+        .replace("&amp;", "&")
+//        .replace(Regex("\\{ce\\s*\\{(.*?)}}")) {
+//            "[CHEM:${it.groupValues[1]}]"
+//        }
+//        .trim()
+
+    // Handle chemical equations with better formatting
+    processed = processed.replace(Regex("<chem>([^<]+)</chem>")) { match ->
+        val equation = match.groupValues[1]
+            .replace(Regex("&gt;"), "→") // Convert HTML arrow to Unicode arrow
+            .replace(Regex("&lt;"), "←")
+            .replace(Regex("&amp;"), "&")
+            .replace(Regex("\\s*->\\s*"), " → ") // Format arrows with spaces
+            .replace(Regex("\\s*<-\\s*"), " ← ")
+            .replace(Regex("\\s*<->\\s*"), " ↔ ")
+        "\n[CHEM:$equation]\n"
+    }
+
+
+    // Handle mathematical equations
+    processed = processed.replace(Regex("<math>([^<]+)</math>")) { match ->
+        val equation = match.groupValues[1]
+        "\n[MATH:$equation]\n"
+    }
+
+    // Convert inline images
+    processed = processed.replace(Regex("<noscript>\\s*<img[^>]+src=\"([^\"]+)\"[^>]*>\\s*</noscript>")) { match ->
+        val rawSrc = match.groupValues[1]
+        val fullUrl = if (rawSrc.startsWith("//")) "https:$rawSrc" else rawSrc
+        "\n[[[IMG:$fullUrl]]]\n"
+    }
 
     // Clean up any remaining HTML tags
     processed = processed.replace(Regex("<[^>]+>"), "")
+
+    // Remove any line-level leading spaces
+    processed = processed
+        .lines()
+        .joinToString("\n") { it.trimStart() }
 
     // Handle scientific names and terms
     processed = processed
         .replace(Regex("\\*([A-Z][a-z]+ [a-z]+)\\*"), "*$1*") // Format scientific names
         .replace(Regex("\\*([A-Z][a-z]+)\\*"), "*$1*") // Format genus names
+
+    // Final cleanup
+    processed = processed
+        .replace(Regex("\\n{3,}"), "\n") // Normalize multiple newlines
+        .replace(Regex("^\\s+$", RegexOption.MULTILINE), "") // Remove empty lines
+        .replace(Regex("\\[edit\\]"), "") // Remove edit links
+        .trim()
 
     return processed
 }

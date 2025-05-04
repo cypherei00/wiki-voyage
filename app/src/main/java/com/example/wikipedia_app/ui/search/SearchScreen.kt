@@ -13,32 +13,45 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.wikipedia_app.data.History
 import com.example.wikipedia_app.model.SearchResult
 import com.example.wikipedia_app.model.WikipediaResponse
 import com.example.wikipedia_app.network.RetrofitInstance
+import com.example.wikipedia_app.ui.viewmodels.HistoryViewModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import android.text.Html
 import android.os.Build
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.AlertDialogDefaults.containerColor
+import com.example.wikipedia_app.navigation.Screen
+import com.example.wikipedia_app.ui.theme.CreamOffWhite
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(navController: NavHostController) {
+fun SearchScreen(
+    navController: NavHostController,
+    historyViewModel: HistoryViewModel
+) {
     var query by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<SearchResult>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
     var totalHits by remember { mutableStateOf(0) }
     var suggestion by remember { mutableStateOf<String?>(null) }
+    var showClearHistoryDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val history by historyViewModel.history.collectAsState()
 
     // Speech recognizer launcher
     val voiceSearchLauncher = rememberLauncherForActivityResult(
@@ -67,60 +80,42 @@ fun SearchScreen(navController: NavHostController) {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            OutlinedTextField(
-                value = query,
-                onValueChange = {
-                    query = it
-                    fetchArticles(
-                        query = query,
-                        onLoadingChanged = { isLoading = it },
-                        onResult = { results, hits, suggest -> 
-                            searchResults = results
-                            totalHits = hits
-                            suggestion = suggest
-                        },
-                        onError = { errorMessage ->
-                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                        }
-                    )
-                },
-                label = { Text("Search Wikipedia") },
-                leadingIcon = {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = "Search Icon")
-                },
-                trailingIcon = {
-                    IconButton(onClick = { startVoiceSearch(context, voiceSearchLauncher) }) {
-                        Icon(imageVector = Icons.Default.Mic, contentDescription = "Voice Search")
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Home") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
-                modifier = Modifier.weight(1f)
+                actions = {
+                    if (history.isNotEmpty()) {
+                        IconButton(onClick = { showClearHistoryDialog = true }) {
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Clear History")
+                        }
+                    }
+                }
             )
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Show search suggestion if available
-        suggestion?.let { suggest ->
-            Text(
-                text = "Did you mean: $suggest",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .padding(vertical = 4.dp)
-                    .clickable {
-                        query = suggest
+                    .fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = {
+                        query = it
                         fetchArticles(
-                            query = suggest,
+                            query = query,
                             onLoadingChanged = { isLoading = it },
                             onResult = { results, hits, suggest -> 
                                 searchResults = results
@@ -131,34 +126,147 @@ fun SearchScreen(navController: NavHostController) {
                                 Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                             }
                         )
-                    }
-            )
-        }
+                    },
+                    label = { Text("Search Wikipedia") },
+                    leadingIcon = {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search Icon")
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { startVoiceSearch(context, voiceSearchLauncher) }) {
+                            Icon(imageVector = Icons.Default.Mic, contentDescription = "Voice Search")
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
 
-        // Show total hits
-        if (totalHits > 0) {
-            Text(
-                text = "Found $totalHits results",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-        }
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+            // Show search suggestion if available
+            suggestion?.let { suggest ->
+                Text(
+                    text = "Did you mean: $suggest",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .padding(vertical = 4.dp)
+                        .clickable {
+                            query = suggest
+                            fetchArticles(
+                                query = suggest,
+                                onLoadingChanged = { isLoading = it },
+                                onResult = { results, hits, suggest -> 
+                                    searchResults = results
+                                    totalHits = hits
+                                    suggestion = suggest
+                                },
+                                onError = { errorMessage ->
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        }
+                )
+            }
 
-        if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(searchResults) { result ->
-                    SearchResultItem(result) {
-                        navController.navigate("article/${result.title}")
+            // Show total hits
+            if (totalHits > 0) {
+                Text(
+                    text = "Found $totalHits results",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    if (query.isEmpty() && history.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "Recent History",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        items(history) { historyItem ->
+                            HistoryItem(historyItem) {
+                                navController.navigate(Screen.Article.createRoute(historyItem.title))
+                            }
+                        }
+                    } else {
+                        items(searchResults) { result ->
+                            SearchResultItem(result) {
+                                historyViewModel.addToHistory(result.title, "https://en.wikipedia.org/wiki/${result.title}")
+                                navController.navigate(Screen.Article.createRoute(result.title))
+                            }
+                        }
                     }
                 }
             }
         }
     }
+
+    if (showClearHistoryDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearHistoryDialog = false },
+            title = { Text("Clear History") },
+            text = { Text("Are you sure you want to clear your search history?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        historyViewModel.clearHistory()
+                        showClearHistoryDialog = false
+                    }
+                ) {
+                    Text("Clear")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearHistoryDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun HistoryItem(history: History, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 16.dp)
+            .clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.History,
+            contentDescription = "History",
+            modifier = Modifier.padding(end = 16.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+        )
+        Column {
+            Text(
+                text = history.title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+            )
+            Text(
+                text = history.timestamp.toString(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
+        }
+    }
+    Divider(
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f),
+        thickness = 1.dp,
+        modifier = Modifier.padding(horizontal = 16.dp)
+    )
 }
 
 @Composable
@@ -170,7 +278,7 @@ fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
             .clickable { onClick() },
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = CreamOffWhite.copy(alpha = 0.9f)
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

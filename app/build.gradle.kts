@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -26,6 +27,10 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            isDebuggable = true
+            applicationIdSuffix = ".debug"
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -36,6 +41,11 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
@@ -66,9 +76,9 @@ dependencies {
     implementation ("androidx.compose.animation:animation:1.6.0") // or your Compose version
 
 // Room Database
-    implementation ("androidx.room:room-runtime:2.6.1")
-//    kapt ("androidx.room:room-compiler:2.6.1")
-    implementation ("androidx.room:room-ktx:2.6.1")
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
 
 // Coil (Image loading, optional)
     implementation ("io.coil-kt:coil-compose:2.4.0")
@@ -88,4 +98,6 @@ dependencies {
     // Add animation dependencies
     implementation("androidx.compose.animation:animation:1.6.1")
     implementation("androidx.compose.animation:animation-core:1.6.1")
+
+    implementation("org.jsoup:jsoup:1.17.2")
 }
