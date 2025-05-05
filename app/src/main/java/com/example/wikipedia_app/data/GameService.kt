@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit
 class GameService {
     private val baseUrl = "https://en.wikipedia.org/wiki/"
     private val timeout = 10L // seconds
+    private val maxLinks = 100 // Limit number of links to prevent overload
 
     suspend fun getRandomArticle(): Article = withContext(Dispatchers.IO) {
         try {
@@ -59,8 +60,19 @@ class GameService {
 
     private fun extractLinks(doc: Document): List<WikiLink> {
         return doc.select("div#mw-content-text a[href^='/wiki/']")
-//            .filter { !it.attr("href").contains(":") } // Filter out special pages
-            .map { WikiLink(it.text(), it.attr("href").substring(6)) }
+            .toList() // <-- This fixes the error!
+            .filter { !it.attr("href").contains(":") }
+            .filter { !it.attr("href").contains("#") }
+            .filter { it.text().isNotBlank() }
+            .filter { !it.text().contains("edit") }
+            .filter { !it.text().contains("citation needed") }
+            .take(maxLinks)
+            .map { element ->
+                WikiLink(
+                    text = element.text(),
+                    target = element.attr("href").substring(6)
+                )
+            }
             .distinct()
     }
 }
