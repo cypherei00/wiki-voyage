@@ -38,6 +38,12 @@ import com.example.wikipedia_app.ui.theme.CreamOffWhite
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.wikipedia_app.network.ApiConfig
+import android.content.Context
+import android.os.PowerManager
+import android.view.WindowManager
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +59,39 @@ fun SearchScreen(
     var showClearHistoryDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val history by historyViewModel.history.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Wake lock management
+    val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+    var wakeLock: PowerManager.WakeLock? by remember { mutableStateOf(null) }
+
+    // Handle lifecycle events for wake lock
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    wakeLock = powerManager.newWakeLock(
+                        PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ON_AFTER_RELEASE,
+                        "WikipediaApp:SearchScreenWakeLock"
+                    ).apply {
+                        acquire(10*60*1000L /*10 minutes*/)
+                    }
+                }
+                Lifecycle.Event.ON_PAUSE -> {
+                    wakeLock?.release()
+                    wakeLock = null
+                }
+                else -> {}
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            wakeLock?.release()
+            wakeLock = null
+        }
+    }
 
     // Speech recognizer launcher
     val voiceSearchLauncher = rememberLauncherForActivityResult(
