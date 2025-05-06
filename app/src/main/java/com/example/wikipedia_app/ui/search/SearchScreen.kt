@@ -37,6 +37,7 @@ import com.example.wikipedia_app.navigation.Screen
 import com.example.wikipedia_app.ui.theme.CreamOffWhite
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.example.wikipedia_app.network.ApiConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -200,7 +201,7 @@ fun SearchScreen(
                     } else {
                         items(searchResults) { result ->
                             SearchResultItem(result) {
-                                historyViewModel.addToHistory(result.title, "https://en.wikipedia.org/wiki/${result.title}")
+                                historyViewModel.addToHistory(result.title, "${ApiConfig.WIKIPEDIA_BASE_URL}wiki/${result.title}")
                                 navController.navigate(Screen.Article.createRoute(result.title))
                             }
                         }

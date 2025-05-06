@@ -1,5 +1,6 @@
 package com.example.wikipedia_app.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.wikipedia_app.R
 import com.example.wikipedia_app.navigation.Screen
+import com.example.wikipedia_app.network.ApiConfig
 import java.util.*
 
 data class Language(
@@ -30,6 +32,8 @@ fun LanguageSelectionScreen(
     navController: NavController,
     onLanguageSelected: (String) -> Unit
 ) {
+    val TAG = "LanguageSelection"
+
     val languages = remember {
         listOf(
             Language("en", "English", "English"),
@@ -46,6 +50,7 @@ fun LanguageSelectionScreen(
     }
 
     val currentLocale = remember { Locale.getDefault() }
+    Log.d(TAG, "Current system locale: ${currentLocale.language}")
 
     Scaffold(
         topBar = {
@@ -69,7 +74,14 @@ fun LanguageSelectionScreen(
                     language = language,
                     isSelected = language.code == currentLocale.language,
                     onLanguageSelected = {
-                        onLanguageSelected(language.code)
+                        Log.d(TAG, "Language selected: ${language.name} (${language.code})")
+                        try {
+                            ApiConfig.setLanguage(language.code)
+                            onLanguageSelected(language.code)
+                            Log.d(TAG, "Language change completed successfully")
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error changing language: ${e.message}", e)
+                        }
                         navController.navigateUp()
                     }
                 )

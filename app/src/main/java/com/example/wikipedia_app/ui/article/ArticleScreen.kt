@@ -26,6 +26,7 @@ import com.example.wikipedia_app.model.ArticleResponse
 import com.example.wikipedia_app.model.ArticleSection
 import com.example.wikipedia_app.model.Section
 import com.example.wikipedia_app.network.RetrofitInstance
+import com.example.wikipedia_app.network.ApiConfig
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -89,7 +90,7 @@ fun ArticleScreen(
 
     LaunchedEffect(title) {
         viewModel.checkBookmarkStatus(title)
-        historyViewModel.addToHistory(title, "https://en.wikipedia.org/wiki/$title")
+        historyViewModel.addToHistory(title, "${ApiConfig.WIKIPEDIA_BASE_URL}wiki/$title")
         isLoading = true
         sectionsLoaded = false
         Log.d("ARTICLE_LOADING", "Starting to load article: $title")
@@ -113,7 +114,7 @@ fun ArticleScreen(
                         
                         articleImages = parse.images
                             ?.filter { it.endsWith(".jpg", true) || it.endsWith(".png", true) }
-                            ?.map { "https://en.wikipedia.org/wiki/Special:FilePath/${it.removePrefix("File:")}" }
+                            ?.map { "${ApiConfig.WIKIPEDIA_BASE_URL}wiki/Special:FilePath/${it.removePrefix("File:")}" }
                             ?.distinct()
                             ?.take(3)
                             ?: emptyList()
@@ -194,7 +195,7 @@ fun ArticleScreen(
                             viewModel.toggleBookmark(
                                 Bookmark(
                                     title = title,
-                                    url = "https://en.wikipedia.org/wiki/$title"
+                                    url = "${ApiConfig.WIKIPEDIA_BASE_URL}wiki/$title"
                                 )
                             )
                         }
